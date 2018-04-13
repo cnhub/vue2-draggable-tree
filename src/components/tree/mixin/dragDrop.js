@@ -13,13 +13,31 @@ export default {
 		selectstart() {
 			return false;
 		},
-
+		getElementOffset(element){
+		    let left = element.offsetLeft,
+				top = element.offsetTop,
+				current = element.offsetParent;
+		    while (current !== null){
+		        left += current.offsetLeft;
+		        top += current.offsetTop;
+		        current = current.offsetParent;
+		    }
+		    return {
+		    	left,
+		    	top
+		    };
+		},
 		dragstart(event) {
 			this.draggingNode = event.target;
 			event.dataTransfer.effectAllowed = 'move';
 			event.dataTransfer.setData("text", this.draggingNode.innerHTML);
 			if (event.dataTransfer.setDragImage) {
-				event.dataTransfer.setDragImage(event.target, 0, 0);
+				// event.dataTransfer.setDragImage(event.target, 0, 0);
+				let offset = this.getElementOffset(event.target),
+					x = event.pageX - offset.left,
+					y = event.pageY - offset.top;
+					console.log(x, y);
+				event.dataTransfer.setDragImage(event.target, x, y);
 			}
 			this.startLocation = {
 				x: event.pageX,
@@ -41,7 +59,7 @@ export default {
 					event.dataTransfer.dropEffect = 'none';
 				} else {
 					let targetNode;
-					for (let i = 0, l = this.droppableNodes.length; i < l; i++) {
+					for (var i = 0, l = this.droppableNodes.length; i < l; i++) {
 						let dropPosition = Utils.getElementPosition(this.droppableNodes[i]);
 						if (targetLocation.y >= dropPosition.top && targetLocation.y <= dropPosition.bottom) {
 							targetNode = this.droppableNodes[i];
@@ -119,7 +137,7 @@ export default {
 		},
 
 		clearDragOverStyle() {
-			for (let i = 0; i < this.droppableNodes.length; i++) {
+			for (var i = 0; i < this.droppableNodes.length; i++) {
 				this.droppableNodes[i].style.borderColor = 'transparent';
 				this.droppableNodes[i].style.background = '';
 			}
@@ -127,7 +145,7 @@ export default {
 
 		getTargetDropNode(targetLocation) {
 			let targetDropNode;
-			for (let i = 0, l = this.droppableNodes.length; i < l; i++) {
+			for (var i = 0, l = this.droppableNodes.length; i < l; i++) {
 				let position = Utils.getElementPosition(this.droppableNodes[i]);
 				if (targetLocation.y >= position.top && targetLocation.y <= position.bottom) {
 					targetDropNode = this.droppableNodes[i];
